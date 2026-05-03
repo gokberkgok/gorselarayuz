@@ -27,11 +27,11 @@ class BrowsePage(QWidget):
         layout.setContentsMargins(32, 32, 32, 32)
         layout.setSpacing(16)
 
-        title = QLabel("🔍  Browse Places")
+        title = QLabel("🔍  Mekanlara Göz At")
         title.setProperty("class", "page-title")
         layout.addWidget(title)
 
-        sub = QLabel("Search and filter to find the perfect place")
+        sub = QLabel("Mükemmel mekanı bulmak için ara ve filtrele")
         sub.setProperty("class", "page-subtitle")
         layout.addWidget(sub)
 
@@ -40,7 +40,7 @@ class BrowsePage(QWidget):
         filter_row.setSpacing(12)
 
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("🔎  Search places...")
+        self.search_input.setPlaceholderText("🔎  Mekan ara...")
         self.search_input.setMinimumHeight(44)
         self.search_input.textChanged.connect(lambda: self.search_timer.start())
         filter_row.addWidget(self.search_input, 2)
@@ -48,7 +48,7 @@ class BrowsePage(QWidget):
         self.type_filter = QComboBox()
         self.type_filter.setMinimumHeight(44)
         self.type_filter.setMinimumWidth(180)
-        self.type_filter.addItem("All Types", None)
+        self.type_filter.addItem("Tüm Tipler", None)
         self.type_filter.currentIndexChanged.connect(self.load_data)
         filter_row.addWidget(self.type_filter, 1)
 
@@ -72,7 +72,7 @@ class BrowsePage(QWidget):
                 self.types = self.api.get_types()
                 self.type_filter.blockSignals(True)
                 self.type_filter.clear()
-                self.type_filter.addItem("All Types", None)
+                self.type_filter.addItem("Tüm Tipler", None)
                 for t in self.types:
                     self.type_filter.addItem(t["name"], t["id"])
                 self.type_filter.blockSignals(False)
@@ -91,7 +91,7 @@ class BrowsePage(QWidget):
         try:
             places = self.api.get_places(type_id=type_id, search=search, limit=50)
             if not places:
-                empty = QLabel("📭  No places found")
+                empty = QLabel("📭  Mekan bulunamadı")
                 empty.setStyleSheet("font-size: 18px; color: #888; padding: 40px;")
                 empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.grid_layout.addWidget(empty, 0, 0, 1, 3)
@@ -103,6 +103,6 @@ class BrowsePage(QWidget):
                 row, col = divmod(i, 3)
                 self.grid_layout.addWidget(card, row, col)
         except Exception as e:
-            err = QLabel(f"❌ Error: {e}")
+            err = QLabel(f"❌ Hata: {e}")
             err.setStyleSheet("color: #FF6B6B;")
             self.grid_layout.addWidget(err, 0, 0)

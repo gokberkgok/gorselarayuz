@@ -9,11 +9,15 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 
+from frontend.components.dialogs import ReservationDetailsDialog
+
+
 class AdminReservationsPage(QWidget):
     def __init__(self, api_client, toast_fn):
         super().__init__()
         self.api = api_client
         self.toast = toast_fn
+        self.reservations_list = []
         self._build_ui()
 
     def _build_ui(self):
@@ -22,7 +26,7 @@ class AdminReservationsPage(QWidget):
         layout.setSpacing(16)
 
         header = QHBoxLayout()
-        title = QLabel("📋  All Reservations")
+        title = QLabel("📋  Tüm Rezervasyonlar")
         title.setProperty("class", "page-title")
         header.addWidget(title)
         header.addStretch()
@@ -30,11 +34,11 @@ class AdminReservationsPage(QWidget):
         self.status_filter = QComboBox()
         self.status_filter.setMinimumWidth(160)
         self.status_filter.setMinimumHeight(40)
-        self.status_filter.addItem("All Status", None)
-        self.status_filter.addItem("⏳ Pending", "pending")
-        self.status_filter.addItem("✅ Approved", "approved")
-        self.status_filter.addItem("❌ Cancelled", "cancelled")
-        self.status_filter.addItem("🚫 Rejected", "rejected")
+        self.status_filter.addItem("Tüm Durumlar", None)
+        self.status_filter.addItem("⏳ Bekliyor", "pending")
+        self.status_filter.addItem("✅ Onaylandı", "approved")
+        self.status_filter.addItem("❌ İptal Edildi", "cancelled")
+        self.status_filter.addItem("🚫 Reddedildi", "rejected")
         self.status_filter.currentIndexChanged.connect(self.load_data)
         header.addWidget(self.status_filter)
 
@@ -44,14 +48,14 @@ class AdminReservationsPage(QWidget):
         header.addWidget(refresh_btn)
         layout.addLayout(header)
 
-        sub = QLabel("Review and manage all reservations")
+        sub = QLabel("Tüm rezervasyonları incele ve yönet")
         sub.setProperty("class", "page-subtitle")
         layout.addWidget(sub)
 
         self.table = QTableWidget()
         self.table.setColumnCount(9)
         self.table.setHorizontalHeaderLabels([
-            "ID", "User", "Place", "Date", "Start", "End", "Status", "Approve", "Reject"
+            "ID", "Kullanıcı", "Mekan", "Tarih", "Başlangıç", "Bitiş", "Durum", "Onayla", "Reddet"
         ])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -64,6 +68,7 @@ class AdminReservationsPage(QWidget):
         self.table.setShowGrid(False)
         self.table.setAlternatingRowColors(False)
         self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.table.itemDoubleClicked.connect(self._on_item_double_clicked)
         layout.addWidget(self.table)
 
     def load_data(self):
@@ -71,6 +76,7 @@ class AdminReservationsPage(QWidget):
         status = self.status_filter.currentData()
         try:
             reservations = self.api.get_all_reservations(status_filter=status)
+            self.reservations_list = reservations
             self.table.setRowCount(len(reservations))
             for i, r in enumerate(reservations):
                 self.table.setItem(i, 0, QTableWidgetItem(str(r["id"])))
@@ -81,7 +87,14 @@ class AdminReservationsPage(QWidget):
                 self.table.setItem(i, 5, QTableWidgetItem(str(r["end_time"])))
 
                 st = r["status"]
-                st_lbl = QLabel(f"  {st.upper()}  ")
+                
+                tr_status = st
+                if st == "pending": tr_status = "BEKLİYOR"
+                elif st == "approved": tr_status = "ONAYLANDI"
+                elif st == "cancelled": tr_status = "İPTAL"
+                elif st == "rejected": tr_status = "REDDEDİLDİ"
+
+                st_lbl = QLabel(f"  {tr_status}  ")
                 st_lbl.setProperty("class", f"status-{st}")
                 st_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.table.setCellWidget(i, 6, st_lbl)
@@ -115,20 +128,27 @@ class AdminReservationsPage(QWidget):
 
                 self.table.setRowHeight(i, 64)
         except Exception as e:
-            self.toast(f"Error: {e}", "error")
+            self.toast(f"Hata: {e}", "error")
 
     def _approve(self, rid):
         try:
             self.api.approve_reservation(rid)
-            self.toast("Reservation approved!", "success")
+            self.toast("Rezervasyon onaylandı!", "success")
             self.load_data()
         except Exception as e:
-            self.toast(f"Error: {e}", "error")
+            self.toast(f"Hata: {e}", "error")
 
     def _reject(self, rid):
         try:
             self.api.reject_reservation(rid)
-            self.toast("Reservation rejected", "info")
+            self.toast("Rezervasyon reddedildi", "info")
             self.load_data()
         except Exception as e:
-            self.toast(f"Error: {e}", "error")
+            self.toast(f"Hata: {e}", "error")
+
+    def _on_item_double_clicked(self, item):
+        row = item.row()
+        if hasattr(self, "reservations_list") and row < len(self.reservations_list):
+            data = self.reservations_list[row]
+            dlg = ReservationDetailsDialog(self, data, on_approve=self._approve, on_reject=self._reject)
+            dlg.exec()

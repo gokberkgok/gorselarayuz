@@ -84,7 +84,9 @@ class MainWindow(QMainWindow):
         # Build pages based on role
         self.pages = {}
         if role == "admin":
-            self._add_page("admin_dashboard", AdminDashboardPage(self.api))
+            dashboard = AdminDashboardPage(self.api)
+            dashboard.navigate_requested.connect(self._on_dashboard_navigate)
+            self._add_page("admin_dashboard", dashboard)
             self._add_page("admin_places", AdminPlacesPage(self.api, self._show_toast))
             self._add_page("admin_reservations", AdminReservationsPage(self.api, self._show_toast))
             self._add_page("settings", SettingsPage(self.api, self.current_theme))
@@ -114,6 +116,11 @@ class MainWindow(QMainWindow):
     def _add_page(self, key, widget):
         self.pages[key] = widget
         self.page_stack.addWidget(widget)
+
+    def _on_dashboard_navigate(self, page_key):
+        if self.sidebar:
+            self.sidebar.set_active(page_key)
+        self._on_page_changed(page_key)
 
     def _on_page_changed(self, page_key):
         if page_key == "logout":

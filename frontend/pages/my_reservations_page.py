@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem, QPushButton, QHeaderView, QAbstractItemView
 )
 from PyQt6.QtCore import Qt
+from frontend.components.dialogs import ReservationDetailsDialog
 
 
 class MyReservationsPage(QWidget):
@@ -13,6 +14,7 @@ class MyReservationsPage(QWidget):
         super().__init__()
         self.api = api_client
         self.toast = toast_fn
+        self.reservations_list = []
         self._build_ui()
 
     def _build_ui(self):
@@ -21,18 +23,18 @@ class MyReservationsPage(QWidget):
         layout.setSpacing(16)
 
         header = QHBoxLayout()
-        title = QLabel("📋  My Reservations")
+        title = QLabel("📋  Rezervasyonlarım")
         title.setProperty("class", "page-title")
         header.addWidget(title)
         header.addStretch()
 
-        refresh_btn = QPushButton("🔄  Refresh")
+        refresh_btn = QPushButton("🔄  Yenile")
         refresh_btn.setProperty("class", "outline-btn")
         refresh_btn.clicked.connect(self.load_data)
         header.addWidget(refresh_btn)
         layout.addLayout(header)
 
-        sub = QLabel("Track your bookings and manage reservations")
+        sub = QLabel("Rezervasyonlarınızı takip edin ve yönetin")
         sub.setProperty("class", "page-subtitle")
         layout.addWidget(sub)
 
@@ -40,24 +42,28 @@ class MyReservationsPage(QWidget):
         self.table = QTableWidget()
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels([
-            "ID", "Place", "Date", "Start", "End", "Status", "Action"
+            "ID", "Mekan", "Tarih", "Başlangıç", "Bitiş", "Durum", "İşlem"
         ])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Fixed)
+        self.table.setColumnWidth(5, 160)
+        self.table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Fixed)
+        self.table.setColumnWidth(6, 160)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.verticalHeader().setVisible(False)
         self.table.setShowGrid(False)
         self.table.setAlternatingRowColors(False)
         self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.table.itemDoubleClicked.connect(self._on_item_double_clicked)
         layout.addWidget(self.table)
 
     def load_data(self):
         self.table.setRowCount(0)
         try:
             reservations = self.api.get_my_reservations()
+            self.reservations_list = reservations
             self.table.setRowCount(len(reservations))
             for i, r in enumerate(reservations):
                 self.table.setItem(i, 0, QTableWidgetItem(str(r["id"])))
@@ -67,7 +73,14 @@ class MyReservationsPage(QWidget):
                 self.table.setItem(i, 4, QTableWidgetItem(str(r["end_time"])))
 
                 status = r["status"]
-                status_lbl = QLabel(f"  {status.upper()}  ")
+                
+                tr_status = status
+                if status == "pending": tr_status = "BEKLİYOR"
+                elif status == "approved": tr_status = "ONAYLANDI"
+                elif status == "cancelled": tr_status = "İPTAL"
+                elif status == "rejected": tr_status = "REDDEDİLDİ"
+
+                status_lbl = QLabel(f"  {tr_status}  ")
                 status_lbl.setProperty("class", f"status-{status}")
                 status_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.table.setCellWidget(i, 5, status_lbl)
@@ -76,7 +89,7 @@ class MyReservationsPage(QWidget):
                     cancel_w = QWidget()
                     cancel_l = QHBoxLayout(cancel_w)
                     cancel_l.setContentsMargins(4, 4, 4, 4)
-                    cancel_btn = QPushButton("❌ Cancel")
+                    cancel_btn = QPushButton("❌ İptal Et")
                     cancel_btn.setProperty("class", "danger-btn")
                     cancel_btn.setFixedHeight(36)
                     cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -89,12 +102,19 @@ class MyReservationsPage(QWidget):
 
                 self.table.setRowHeight(i, 64)
         except Exception as e:
-            self.toast(f"Error: {e}", "error")
+            self.toast(f"Hata: {e}", "error")
 
     def _cancel(self, rid):
         try:
             self.api.cancel_reservation(rid)
-            self.toast("Reservation cancelled", "success")
+            self.toast("Rezervasyon iptal edildi", "success")
             self.load_data()
         except Exception as e:
-            self.toast(f"Error: {e}", "error")
+            self.toast(f"Hata: {e}", "error")
+
+    def _on_item_double_clicked(self, item):
+        row = item.row()
+        if hasattr(self, "reservations_list") and row < len(self.reservations_list):
+            data = self.reservations_list[row]
+            dlg = ReservationDetailsDialog(self, data)
+            dlg.exec()

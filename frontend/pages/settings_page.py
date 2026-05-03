@@ -22,11 +22,11 @@ class SettingsPage(QWidget):
         layout.setContentsMargins(32, 32, 32, 32)
         layout.setSpacing(20)
 
-        title = QLabel("⚙️  Settings")
+        title = QLabel("⚙️  Ayarlar")
         title.setProperty("class", "page-title")
         layout.addWidget(title)
 
-        sub = QLabel("Customize your experience")
+        sub = QLabel("Deneyiminizi kişiselleştirin")
         sub.setProperty("class", "page-subtitle")
         layout.addWidget(sub)
 
@@ -36,12 +36,12 @@ class SettingsPage(QWidget):
         info_layout = QVBoxLayout(info_card)
         info_layout.setSpacing(12)
 
-        info_title = QLabel("👤  Account Information")
+        info_title = QLabel("👤  Hesap Bilgileri")
         info_title.setProperty("class", "card-title")
         info_layout.addWidget(info_title)
 
         name_row = QHBoxLayout()
-        name_row.addWidget(QLabel("Name:"))
+        name_row.addWidget(QLabel("İsim:"))
         name_val = QLabel(self.api.user_name or "—")
         name_val.setStyleSheet("font-weight: 600;")
         name_row.addWidget(name_val)
@@ -49,7 +49,7 @@ class SettingsPage(QWidget):
         info_layout.addLayout(name_row)
 
         role_row = QHBoxLayout()
-        role_row.addWidget(QLabel("Role:"))
+        role_row.addWidget(QLabel("Rol:"))
         role_val = QLabel((self.api.user_role or "—").upper())
         role_val.setStyleSheet("font-weight: 600;")
         role_row.addWidget(role_val)
@@ -57,7 +57,7 @@ class SettingsPage(QWidget):
         info_layout.addLayout(role_row)
 
         id_row = QHBoxLayout()
-        id_row.addWidget(QLabel("User ID:"))
+        id_row.addWidget(QLabel("Kullanıcı ID:"))
         id_val = QLabel(str(self.api.user_id or "—"))
         id_val.setStyleSheet("font-weight: 600;")
         id_row.addWidget(id_val)
@@ -72,12 +72,12 @@ class SettingsPage(QWidget):
         theme_layout = QVBoxLayout(theme_card)
         theme_layout.setSpacing(12)
 
-        theme_title = QLabel("🎨  Appearance")
+        theme_title = QLabel("🎨  Görünüm")
         theme_title.setProperty("class", "card-title")
         theme_layout.addWidget(theme_title)
 
         toggle_row = QHBoxLayout()
-        toggle_row.addWidget(QLabel("Dark Mode"))
+        toggle_row.addWidget(QLabel("Karanlık Mod"))
 
         self.theme_toggle = QCheckBox()
         self.theme_toggle.setChecked(self.current_theme == "dark")

@@ -11,16 +11,16 @@ class Sidebar(QWidget):
     page_changed = pyqtSignal(str)
 
     USER_PAGES = [
-        ("🏠", "Home", "home"),
-        ("🔍", "Browse", "browse"),
-        ("📋", "My Reservations", "my_reservations"),
-        ("⚙️", "Settings", "settings"),
+        ("🏠", "Ana Sayfa", "home"),
+        ("🔍", "Göz At", "browse"),
+        ("📋", "Rezervasyonlarım", "my_reservations"),
+        ("⚙️", "Ayarlar", "settings"),
     ]
     ADMIN_PAGES = [
-        ("📊", "Dashboard", "admin_dashboard"),
-        ("🏨", "Manage Places", "admin_places"),
-        ("📋", "Reservations", "admin_reservations"),
-        ("⚙️", "Settings", "settings"),
+        ("📊", "Gösterge Paneli", "admin_dashboard"),
+        ("🏨", "Mekan Yönetimi", "admin_places"),
+        ("📋", "Rezervasyonlar", "admin_reservations"),
+        ("⚙️", "Ayarlar", "settings"),
     ]
 
     def __init__(self, role="user", user_name="User"):
@@ -43,7 +43,7 @@ class Sidebar(QWidget):
         if os.path.exists(logo_path):
             pixmap = QPixmap(logo_path)
             # Scale to a reasonable height, keeping aspect ratio
-            pixmap = pixmap.scaledToHeight(40, Qt.TransformationMode.SmoothTransformation)
+            pixmap = pixmap.scaledToHeight(60, Qt.TransformationMode.SmoothTransformation)
             logo_lbl.setPixmap(pixmap)
         else:
             logo_lbl.setText("ReserveApp")
@@ -77,7 +77,7 @@ class Sidebar(QWidget):
         sep.setStyleSheet("background-color: #334155; margin-bottom: 8px;")
         user_info_layout.addWidget(sep)
 
-        subtitle = QLabel(f"<b>{user_name}</b><br><span style='color:#94a3b8; font-size:12px;'>{'Admin' if role == 'admin' else 'User'}</span>")
+        subtitle = QLabel(f"<b>{user_name}</b><br><span style='color:#94a3b8; font-size:12px;'>{'Yönetici' if role == 'admin' else 'Kullanıcı'}</span>")
         subtitle.setStyleSheet("color: #f8fafc; font-size: 14px;")
         subtitle.setWordWrap(True)
         user_info_layout.addWidget(subtitle)
@@ -85,7 +85,7 @@ class Sidebar(QWidget):
         layout.addLayout(user_info_layout)
 
         # Logout button
-        logout_btn = QPushButton("  🚪   Logout")
+        logout_btn = QPushButton("  🚪   Çıkış Yap")
         logout_btn.setProperty("class", "nav-btn logout-btn")
         logout_btn.clicked.connect(lambda: self.page_changed.emit("logout"))
         layout.addWidget(logout_btn)

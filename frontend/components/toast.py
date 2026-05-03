@@ -23,6 +23,11 @@ class Toast(QFrame):
         self.setGraphicsEffect(self.opacity)
         self.opacity.setOpacity(0)
 
+        # Allow layout to calculate size, then adjust
+        self.adjustSize()
+        # Add a bit of padding to calculated width
+        self.resize(max(300, self.width() + 40), self.height())
+        
         self.move(parent.width() - self.width() - 20, 20)
         self.show()
         self.raise_()

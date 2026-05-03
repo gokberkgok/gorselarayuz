@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem, QPushButton, QHeaderView, QAbstractItemView
 )
 from PyQt6.QtCore import Qt
-from frontend.components.dialogs import PlaceFormDialog, ConfirmDialog
+from frontend.components.dialogs import PlaceFormDialog, ConfirmDialog, PlaceDetailsDialog
 
 
 class AdminPlacesPage(QWidget):
@@ -15,6 +15,7 @@ class AdminPlacesPage(QWidget):
         self.api = api_client
         self.toast = toast_fn
         self.types = []
+        self.places_list = []
         self._build_ui()
 
     def _build_ui(self):
@@ -23,25 +24,25 @@ class AdminPlacesPage(QWidget):
         layout.setSpacing(16)
 
         header = QHBoxLayout()
-        title = QLabel("🏨  Manage Places")
+        title = QLabel("🏨  Mekan Yönetimi")
         title.setProperty("class", "page-title")
         header.addWidget(title)
         header.addStretch()
 
-        add_btn = QPushButton("➕  Add Place")
+        add_btn = QPushButton("➕  Mekan Ekle")
         add_btn.setProperty("class", "primary-btn")
         add_btn.clicked.connect(self._add_place)
         header.addWidget(add_btn)
         layout.addLayout(header)
 
-        sub = QLabel("Create, edit, and manage all places")
+        sub = QLabel("Tüm mekanları oluştur, düzenle ve yönet")
         sub.setProperty("class", "page-subtitle")
         layout.addWidget(sub)
 
         self.table = QTableWidget()
         self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels([
-            "ID", "Name", "Type", "Active", "Edit", "Delete"
+            "ID", "İsim", "Tip", "Durum", "Düzenle", "Sil"
         ])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -54,6 +55,7 @@ class AdminPlacesPage(QWidget):
         self.table.setShowGrid(False)
         self.table.setAlternatingRowColors(False)  # QSS handles border bottoms instead
         self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.table.itemDoubleClicked.connect(self._on_item_double_clicked)
         layout.addWidget(self.table)
 
     def load_data(self):
@@ -65,13 +67,14 @@ class AdminPlacesPage(QWidget):
         self.table.setRowCount(0)
         try:
             places = self.api.get_places(limit=100)
+            self.places_list = places
             self.table.setRowCount(len(places))
             for i, p in enumerate(places):
                 self.table.setItem(i, 0, QTableWidgetItem(str(p["id"])))
                 self.table.setItem(i, 1, QTableWidgetItem(p["name"]))
                 self.table.setItem(i, 2, QTableWidgetItem(p.get("type_name", "")))
 
-                status_text = "ACTIVE" if p["is_active"] else "PASSIVE"
+                status_text = "AKTİF" if p["is_active"] else "PASİF"
                 active = QLabel(f"  {status_text}  ")
                 active.setProperty("class", "status-active" if p["is_active"] else "status-passive")
                 active.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -111,17 +114,17 @@ class AdminPlacesPage(QWidget):
             try:
                 self.types = self.api.get_types()
             except:
-                self.toast("Failed to load types", "error")
+                self.toast("Tipler yüklenemedi", "error")
                 return
 
         dlg = PlaceFormDialog(self, self.types)
         if dlg.exec() and dlg.result_data:
             try:
                 self.api.create_place(**dlg.result_data)
-                self.toast("Place created!", "success")
+                self.toast("Mekan oluşturuldu!", "success")
                 self.load_data()
             except Exception as e:
-                self.toast(f"Error: {e}", "error")
+                self.toast(f"Hata: {e}", "error")
 
     def _edit_place(self, data):
         if not self.types:
@@ -134,17 +137,24 @@ class AdminPlacesPage(QWidget):
         if dlg.exec() and dlg.result_data:
             try:
                 self.api.update_place(data["id"], **dlg.result_data)
-                self.toast("Place updated!", "success")
+                self.toast("Mekan güncellendi!", "success")
                 self.load_data()
             except Exception as e:
-                self.toast(f"Error: {e}", "error")
+                self.toast(f"Hata: {e}", "error")
 
     def _delete_place(self, pid):
-        dlg = ConfirmDialog(self, "Delete Place", "Are you sure you want to deactivate this place?")
+        dlg = ConfirmDialog(self, "Mekanı Sil", "Bu mekanı deaktif etmek istediğinize emin misiniz?")
         if dlg.exec():
             try:
                 self.api.delete_place(pid)
-                self.toast("Place deactivated", "success")
+                self.toast("Mekan deaktif edildi", "success")
                 self.load_data()
             except Exception as e:
-                self.toast(f"Error: {e}", "error")
+                self.toast(f"Hata: {e}", "error")
+
+    def _on_item_double_clicked(self, item):
+        row = item.row()
+        if hasattr(self, "places_list") and row < len(self.places_list):
+            data = self.places_list[row]
+            dlg = PlaceDetailsDialog(self, data, on_edit=self._edit_place)
+            dlg.exec()

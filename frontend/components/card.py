@@ -31,16 +31,30 @@ class PlaceCard(QFrame):
         layout.setSpacing(8)
         layout.setContentsMargins(20, 20, 20, 20)
 
-        # Header row: icon + type badge
-        header = QHBoxLayout()
         type_name = place_data.get("type_name", "Other")
-        icon = TYPE_ICONS.get(type_name, "📍")
 
-        icon_lbl = QLabel(icon)
-        icon_lbl.setStyleSheet("font-size: 32px; background: transparent; border: none;")
-        header.addWidget(icon_lbl)
+        # Top Image or Icon
+        img_url = place_data.get("image_url", "")
+        has_image = False
+        if img_url:
+            from PyQt6.QtGui import QPixmap
+            pixmap = QPixmap(img_url)
+            if not pixmap.isNull():
+                img_lbl = QLabel()
+                pixmap = pixmap.scaledToWidth(260, Qt.TransformationMode.SmoothTransformation)
+                img_lbl.setPixmap(pixmap)
+                img_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                layout.addWidget(img_lbl)
+                has_image = True
+
+        header = QHBoxLayout()
+        if not has_image:
+            icon = TYPE_ICONS.get(type_name, "📍")
+            icon_lbl = QLabel(icon)
+            icon_lbl.setStyleSheet("font-size: 32px; background: transparent; border: none;")
+            header.addWidget(icon_lbl)
+            
         header.addStretch()
-
         badge = QLabel(f"  {type_name}  ")
         badge.setProperty("class", "type-badge")
         header.addWidget(badge)
@@ -64,7 +78,7 @@ class PlaceCard(QFrame):
         layout.addStretch()
 
         if show_reserve:
-            reserve_btn = QPushButton("📅  Reserve Now")
+            reserve_btn = QPushButton("📅  Rezervasyon Yap")
             reserve_btn.setProperty("class", "primary-btn")
             reserve_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             reserve_btn.clicked.connect(lambda: self.reserve_clicked.emit(self.place_data))

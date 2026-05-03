@@ -95,6 +95,7 @@ class ReservationResponse(BaseModel):
     user_name: Optional[str] = None
     place_id: int
     place_name: Optional[str] = None
+    place_image_url: Optional[str] = None
     date: date
     start_time: time
     end_time: time

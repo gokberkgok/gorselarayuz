@@ -63,12 +63,12 @@ class LoginPage(QWidget):
 
         # Tab buttons
         tab_row = QHBoxLayout()
-        self.login_tab_btn = QPushButton("Login")
+        self.login_tab_btn = QPushButton("Giriş Yap")
         self.login_tab_btn.setProperty("class", "primary-btn")
         self.login_tab_btn.clicked.connect(lambda: self._switch_tab(0))
         tab_row.addWidget(self.login_tab_btn)
 
-        self.register_tab_btn = QPushButton("Register")
+        self.register_tab_btn = QPushButton("Kayıt Ol")
         self.register_tab_btn.setProperty("class", "outline-btn")
         self.register_tab_btn.clicked.connect(lambda: self._switch_tab(1))
         tab_row.addWidget(self.register_tab_btn)
@@ -83,21 +83,21 @@ class LoginPage(QWidget):
         lf = QVBoxLayout(login_form)
         lf.setSpacing(14)
 
-        lbl = QLabel("Welcome Back")
+        lbl = QLabel("Tekrar Hoş Geldiniz")
         lbl.setProperty("class", "page-title")
         lf.addWidget(lbl)
 
-        sub = QLabel("Sign in to your account")
+        sub = QLabel("Hesabınıza giriş yapın")
         sub.setProperty("class", "page-subtitle")
         lf.addWidget(sub)
 
         self.login_email = QLineEdit()
-        self.login_email.setPlaceholderText("📧  Email address")
+        self.login_email.setPlaceholderText("📧  E-posta")
         self.login_email.setMinimumHeight(48)
         lf.addWidget(self.login_email)
 
         self.login_pass = QLineEdit()
-        self.login_pass.setPlaceholderText("🔒  Password")
+        self.login_pass.setPlaceholderText("🔒  Şifre")
         self.login_pass.setEchoMode(QLineEdit.EchoMode.Password)
         self.login_pass.setMinimumHeight(48)
         lf.addWidget(self.login_pass)
@@ -106,7 +106,7 @@ class LoginPage(QWidget):
         self.login_error.setStyleSheet("color: #FF6B6B; font-size: 13px;")
         lf.addWidget(self.login_error)
 
-        login_btn = QPushButton("🔑  Sign In")
+        login_btn = QPushButton("🔑  Giriş Yap")
         login_btn.setProperty("class", "primary-btn")
         login_btn.setMinimumHeight(48)
         login_btn.clicked.connect(self._do_login)
@@ -120,26 +120,26 @@ class LoginPage(QWidget):
         rf = QVBoxLayout(reg_form)
         rf.setSpacing(14)
 
-        lbl2 = QLabel("Create Account")
+        lbl2 = QLabel("Hesap Oluştur")
         lbl2.setProperty("class", "page-title")
         rf.addWidget(lbl2)
 
-        sub2 = QLabel("Fill in your details to get started")
+        sub2 = QLabel("Başlamak için bilgilerinizi doldurun")
         sub2.setProperty("class", "page-subtitle")
         rf.addWidget(sub2)
 
         self.reg_name = QLineEdit()
-        self.reg_name.setPlaceholderText("👤  Full name")
+        self.reg_name.setPlaceholderText("👤  Ad Soyad")
         self.reg_name.setMinimumHeight(48)
         rf.addWidget(self.reg_name)
 
         self.reg_email = QLineEdit()
-        self.reg_email.setPlaceholderText("📧  Email address")
+        self.reg_email.setPlaceholderText("📧  E-posta")
         self.reg_email.setMinimumHeight(48)
         rf.addWidget(self.reg_email)
 
         self.reg_pass = QLineEdit()
-        self.reg_pass.setPlaceholderText("🔒  Password")
+        self.reg_pass.setPlaceholderText("🔒  Şifre")
         self.reg_pass.setEchoMode(QLineEdit.EchoMode.Password)
         self.reg_pass.setMinimumHeight(48)
         rf.addWidget(self.reg_pass)
@@ -148,7 +148,7 @@ class LoginPage(QWidget):
         self.reg_error.setStyleSheet("color: #FF6B6B; font-size: 13px;")
         rf.addWidget(self.reg_error)
 
-        reg_btn = QPushButton("✨  Create Account")
+        reg_btn = QPushButton("✨  Hesap Oluştur")
         reg_btn.setProperty("class", "primary-btn")
         reg_btn.setMinimumHeight(48)
         reg_btn.clicked.connect(self._do_register)
@@ -177,7 +177,7 @@ class LoginPage(QWidget):
         email = self.login_email.text().strip()
         pwd = self.login_pass.text().strip()
         if not email or not pwd:
-            self.login_error.setText("Please fill all fields")
+            self.login_error.setText("Lütfen tüm alanları doldurun")
             return
         try:
             data = self.api.login(email, pwd)
@@ -190,7 +190,7 @@ class LoginPage(QWidget):
         email = self.reg_email.text().strip()
         pwd = self.reg_pass.text().strip()
         if not name or not email or not pwd:
-            self.reg_error.setText("Please fill all fields")
+            self.reg_error.setText("Lütfen tüm alanları doldurun")
             return
         try:
             data = self.api.register(name, email, pwd)

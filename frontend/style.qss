@@ -2,8 +2,12 @@
 QWidget {
     background-color: #0f172a; /* Tailwind Slate 900 */
     color: #f8fafc; /* Tailwind Slate 50 */
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    font-family: 'Montserrat', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     font-size: 14px;
+}
+
+QLabel {
+    background-color: transparent;
 }
 
 /* Scrollbars */
@@ -76,7 +80,7 @@ QPushButton[class~="logout-btn"]:hover {
 
 /* === CARDS (Places & Stats) === */
 QFrame[class="card"] {
-    background-color: #1e293b; /* Slate 800 */
+    background-color: transparent;
     border: 1px solid #334155;
     border-radius: 12px;
 }
@@ -136,6 +140,19 @@ QComboBox QAbstractItemView {
     selection-background-color: #3b82f6;
     border-radius: 8px;
     outline: none;
+}
+
+/* Date/Time Spinbox Arrows */
+QDateEdit::up-button, QTimeEdit::up-button,
+QDateEdit::down-button, QTimeEdit::down-button {
+    background-color: #334155;
+    border-radius: 4px;
+    margin: 2px 4px;
+    width: 20px;
+}
+QDateEdit::up-button:hover, QTimeEdit::up-button:hover,
+QDateEdit::down-button:hover, QTimeEdit::down-button:hover {
+    background-color: #475569;
 }
 
 /* === BUTTONS === */

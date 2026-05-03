@@ -22,6 +22,7 @@ def _to_response(r: Reservation) -> ReservationResponse:
         user_name=r.user.name if r.user else None,
         place_id=r.place_id,
         place_name=r.place.name if r.place else None,
+        place_image_url=r.place.image_url if r.place else None,
         date=r.date,
         start_time=r.start_time,
         end_time=r.end_time,
